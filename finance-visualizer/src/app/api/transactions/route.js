@@ -1,30 +1,41 @@
 import { connectToDB } from "@/lib/mongodb";
-import Budget from "@/models/Budget";
+import Transaction from "@/models/Transaction";
 import { NextResponse } from "next/server";
 
+// GET: Fetch all transactions
 export async function GET() {
   try {
-    console.log("GET /api/transactions hit");
+    console.log("✅ [GET] /api/transactions called");
     await connectToDB();
-    const data = await Budget.find();
-    return NextResponse.json(data);
+
+    const transactions = await Transaction.find();
+    return NextResponse.json(transactions);
   } catch (error) {
-    console.error("GET /api/transactions failed:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("❌ [GET] /api/transactions error:", error);
+    return NextResponse.json(
+      { error: error.message || "Internal server error" },
+      { status: 500 }
+    );
   }
 }
 
+// POST: Add a new transaction
 export async function POST(req) {
   try {
-    console.log("POST /api/transactions hit");
+    console.log("✅ [POST] /api/transactions called");
     await connectToDB();
-    const body = await req.json();
-    console.log("Received body:", body);
 
-    const result = await Budget.create(body);
-    return NextResponse.json(result, { status: 201 });
+    const body = await req.json();
+    console.log("📦 POST body:", body);
+
+    const transaction = await Transaction.create(body);
+
+    return NextResponse.json(transaction, { status: 201 });
   } catch (error) {
-    console.error("POST /api/transactions failed:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("❌ [POST] /api/transactions error:", error);
+    return NextResponse.json(
+      { error: error.message || "Internal server error" },
+      { status: 500 }
+    );
   }
 }
