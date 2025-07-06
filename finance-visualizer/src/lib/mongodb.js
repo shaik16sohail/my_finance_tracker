@@ -1,24 +1,30 @@
 import mongoose from "mongoose";
 
 let cached = global.mongoose;
-
 if (!cached) {
   cached = global.mongoose = { conn: null };
 }
 
 export async function connectToDB() {
-  const MONGODB_URI = process.env.MONGODB_URI;
-  if (!MONGODB_URI) {
-    throw new Error("MONGODB_URI not set in environment variables");
-  }
-
   if (cached.conn) return cached.conn;
 
-  cached.conn = await mongoose.connect(MONGODB_URI, {
-    dbName: "finance",
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  });
+  const uri = process.env.MONGODB_URI;
+  if (!uri) {
+    console.error("❌ MONGODB_URI is undefined");
+    throw new Error("MONGODB_URI not set");
+  }
 
-  return cached.conn;
+  try {
+    cached.conn = await mongoose.connect(uri, {
+      dbName: "finance",
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+
+    console.log("✅ MongoDB connected");
+    return cached.conn;
+  } catch (err) {
+    console.error("❌ MongoDB connect error:", err);
+    throw err;
+  }
 }

@@ -1,42 +1,30 @@
-import { NextResponse } from "next/server";
 import { connectToDB } from "@/lib/mongodb";
-import Transaction from "@/models/Transaction";
+import Budget from "@/models/Budget";
+import { NextResponse } from "next/server";
 
 export async function GET() {
-  await connectToDB();
-  const transactions = await Transaction.find().sort({ date: -1 });
-  return NextResponse.json(transactions);
+  try {
+    console.log("GET /api/transactions hit");
+    await connectToDB();
+    const data = await Budget.find();
+    return NextResponse.json(data);
+  } catch (error) {
+    console.error("GET /api/transactions failed:", error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
 }
 
 export async function POST(req) {
-  await connectToDB();
-
   try {
+    console.log("POST /api/transactions hit");
+    await connectToDB();
     const body = await req.json();
-    const { description, amount, date, category } = body;
+    console.log("Received body:", body);
 
-    // Validate all required fields
-    if (!description || !amount || !date || !category) {
-      return NextResponse.json(
-        { message: "All fields are required." },
-        { status: 400 }
-      );
-    }
-
-    // Create and save the transaction
-    const transaction = await Transaction.create({
-      description,
-      amount,
-      date,
-      category, // ✅ this is the critical line
-    });
-
-    return NextResponse.json(transaction, { status: 201 });
-  } catch (err) {
-    console.error("Error creating transaction:", err);
-    return NextResponse.json(
-      { message: "Something went wrong." },
-      { status: 500 }
-    );
+    const result = await Budget.create(body);
+    return NextResponse.json(result, { status: 201 });
+  } catch (error) {
+    console.error("POST /api/transactions failed:", error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
