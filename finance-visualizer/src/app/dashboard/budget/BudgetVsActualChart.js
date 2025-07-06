@@ -14,7 +14,7 @@ export default function BudgetVsActualChart({ data }) {
   if (data === "no-budget") {
     return (
       <p className="text-red-500 text-center mt-6 font-medium">
-        You haven't set a budget for this month yet.
+        You havent set a budget for this month yet.
       </p>
     );
   }
